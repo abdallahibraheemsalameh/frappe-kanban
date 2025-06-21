@@ -7,15 +7,6 @@ import { getSalesOrders } from "./services/frappe";
 
 const orders = ref([]);
 
-onMounted(async (): any => {
-  try {
-    orders.value = await getSalesOrders();
-    console.log(orders.value);
-  } catch (error) {
-    console.error("Failed to fetch Sales Orders:", error);
-  }
-});
-
 const kanbanBoard = defineAsyncComponent(
   () => import("./components/KanbanBoard.vue")
 );
