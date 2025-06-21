@@ -59,9 +59,7 @@
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                <span class="delivery-date">{{
-                  formatDate(element.delivery_date)
-                }}</span>
+                <span class="delivery-date">{{ element.delivery_date }}</span>
               </div>
             </div>
           </div>
@@ -94,12 +92,7 @@ import { onMounted, ref } from "vue";
 import draggable from "vuedraggable";
 import dayjs from "dayjs";
 import { getSalesOrders, updateDeliveryDate } from "../services/frappe";
-
-interface SalesOrder {
-  name: string;
-  customer_name: string;
-  delivery_date: string;
-}
+import type { ISalesOrder } from "../domain/meta/i-sales-order";
 
 const weekDays = [
   "Sunday",
@@ -111,45 +104,33 @@ const weekDays = [
   "Saturday",
 ];
 
-const ordersByDay = ref<Record<string, SalesOrder[]>>(
+const ordersByDay = ref<Record<string, ISalesOrder[]>>(
   Object.fromEntries(weekDays.map((d) => [d, []]))
 );
 
-function getDayOfWeek(date: string): string {
+const getDayOfWeek = (date: string): string => {
   const dayIndex = dayjs(date).day();
   return weekDays[dayIndex];
-}
+};
 
-function formatDate(date: string): string {
-  return dayjs(date).format("YYYY-MM-DD");
-}
-
-async function loadOrders() {
+const loadOrders = async () => {
   const orders = await getSalesOrders();
   for (const order of orders) {
     const day = getDayOfWeek(order.delivery_date);
     ordersByDay.value[day].push(order);
   }
-}
+};
 
-async function onDragChange(event: any, day: string) {
-  console.log("Drag change event:", event);
-  console.log("Target day:", day);
-
+const onDragChange = async (event: any, day: string) => {
   if (event.added) {
     const addedOrder = event.added.element;
-    console.log("Added order:", addedOrder);
-
     const newDate = dayjs().day(weekDays.indexOf(day)).format("YYYY-MM-DD");
-
-    console.log("Old date:", addedOrder.delivery_date, "New date:", newDate);
-
     if (addedOrder.delivery_date !== newDate) {
       addedOrder.delivery_date = newDate;
       await updateDeliveryDate(addedOrder.name, newDate);
     }
   }
-}
+};
 
 onMounted(loadOrders);
 </script>

@@ -8,6 +8,6 @@ import { getSalesOrders } from "./services/frappe";
 const orders = ref([]);
 
 const kanbanBoard = defineAsyncComponent(
-  () => import("./components/KanbanBoard.vue")
+  () => import("./components/kanban-board.vue")
 );
 </script>

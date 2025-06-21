@@ -1,4 +1,6 @@
 import axios from "axios";
+import { SalesOrder } from "../domain/def/sales-order";
+import type { ISalesOrder } from "../domain/meta/i-sales-order";
 
 const frappeApi = axios.create({
   baseURL: import.meta.env.VITE_FRAPPE_BASE_URL,
@@ -10,15 +12,17 @@ const frappeApi = axios.create({
   },
 });
 
-export const getSalesOrders = async () => {
+export const getSalesOrders = async (): Promise<ISalesOrder[]> => {
   const response = await frappeApi.get("/api/resource/Sales Order", {
     params: {
       fields: JSON.stringify(["name", "customer_name", "delivery_date"]),
       limit_page_length: 100,
     },
   });
-
-  return response.data.data;
+  return response.data.data.map(
+    (order: any) =>
+      new SalesOrder(order.name, order.customer_name, order.delivery_date)
+  );
 };
 
 export const updateDeliveryDate = async (
